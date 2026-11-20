@@ -5,6 +5,7 @@
 #import "LauncherNavigationController.h"
 #import "LauncherMenuViewController.h"
 #import "LauncherNewsViewController.h"
+#import "ResourceImportUtils.h"
 #import "LauncherPreferences.h"
 #import "LauncherPreferencesViewController.h"
 #import "LauncherProfilesViewController.h"
@@ -79,6 +80,22 @@
     }]];
     
     // TODO: Finish log-uploading service integration
+    [self.options addObject:(id)[LauncherMenuCustomItem
+                                     title:@"导入整合包数据"
+                                     imageName:@"square.and.arrow.down" action:^{
+        UIAlertController *busy = [UIAlertController alertControllerWithTitle:nil
+            message:@"正在导入整合包数据，请稍候…" preferredStyle:UIAlertControllerStyleAlert];
+        busy.modalInPresentation = YES;
+        [contentNavigationController presentViewController:busy animated:YES completion:nil];
+        [ResourceImportUtils importBundledDataWithCompletion:^(BOOL success, NSString *message) {
+            [busy dismissViewControllerAnimated:YES completion:^{
+                UIAlertController *done = [UIAlertController alertControllerWithTitle:
+                    success ? @"导入成功" : @"导入失败" message:message preferredStyle:UIAlertControllerStyleAlert];
+                [done addAction:[UIAlertAction actionWithTitle:@"好" style:UIAlertActionStyleDefault handler:nil]];
+                [contentNavigationController presentViewController:done animated:YES completion:nil];
+            }];
+        }];
+    }]];
     [self.options addObject:
      (id)[LauncherMenuCustomItem
           title:localize(@"login.menu.sendlogs", nil)

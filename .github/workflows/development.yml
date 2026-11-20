@@ -19,7 +19,7 @@ jobs:
           - platform: 2
             platform_name: ios
     
-    runs-on: J316sAP
+    runs-on: macos-15
     steps:
       - name: Remove work folders
         run: |
@@ -79,6 +79,27 @@ jobs:
           git commit -am "CI: Update gl4es"
           git push
 
+      - name: Install build dependencies
+        run: |
+          brew install ldid make
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '8'
+
+      - name: Fetch bundled modpack data (zoo pack)
+        run: |
+          BASE="https://github.com/INORACLE/Amethyst-iOS/releases/download/zoo-data-v1"
+          ok=0
+          for i in 001 002 003 004 005 006 007 008 009 010 011 012; do
+            for a in 1 2 3 4 5; do
+              curl -sfL --max-time 300 --retry 3 -H "Authorization: Bearer $GITHUB_TOKEN" \
+                -o "Natives/resources/AmethystData.zip.$i" "$BASE/AmethystData.zip.$i" && { echo "ok $i"; ok=$((ok+1)); break; } || { echo "retry $a $i"; sleep 3; }
+            done
+          done
+          [ "$ok" -eq 12 ] || { echo "FATAL: only $ok/12 parts downloaded"; ls -la Natives/resources/; exit 1; }
+          du -sh Natives/resources/AmethystData.zip.* | tail -3
       - name: Build for ${{ matrix.platform_name }}
         run: |
           export PATH=/opt/homebrew/bin:$PATH

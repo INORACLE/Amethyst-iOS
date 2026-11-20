@@ -10,6 +10,7 @@
 #import "LauncherPreferences.h"
 #import "PLLogOutputView.h"
 #import "PLProfiles.h"
+#import "ResourceImportUtils.h"
 #import "SurfaceViewController.h"
 #import "UIKit+hook.h"
 #import "config.h"
@@ -311,6 +312,11 @@ int main(int argc, char *argv[]) {
     [PLProfiles updateCurrent];
     init_setupAccounts();
     init_setupCustomControls();
+
+    // Zoo pack: offer one-tap import of bundled modpack data after UI is up
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [ResourceImportUtils checkAndPromptForBundledImport];
+    });
 
     // If sandbox is disabled, W^X JIT can be enabled by Amethyst itself
     if (!isJITEnabled(true) && getEntitlementValue(@"com.apple.private.security.no-sandbox")) {
