@@ -1,5 +1,8 @@
 #include <dirent.h>
 #include <dlfcn.h>
+#include <mach/mach.h>
+#include <mach/mach_init.h>
+#include <mach/thread_act.h>
 #include <errno.h>
 #include <libgen.h>
 #include <spawn.h>
